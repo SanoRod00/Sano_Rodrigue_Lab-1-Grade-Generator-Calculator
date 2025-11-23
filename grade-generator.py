@@ -107,6 +107,28 @@ def summarize(assignments: list[Assignment]) -> None:
     print(f"Final grade: {final_grade:.2f}")
     print(f"GPA (5-point scale): {gpa:.2f}")
     print(f"Pass status: {'PASS' if passed else 'FAIL'}")
+    print(resubmission_message(assignments))
+
+
+def resubmission_message(assignments: list[Assignment]) -> str:
+    """Return a short resubmission note based on failed formative assignments."""
+    failing_fa = [a for a in assignments if a.category == "FA" and a.grade < 50]
+    if not failing_fa:
+        return "Resubmission: no failed formative assignments."
+
+    if len(failing_fa) == 1:
+        a = failing_fa[0]
+        return f"Resubmission: {a.name} (FA) is eligible to resubmit."
+
+    # Multiple failed FAs: pick the one with the highest weight, or list ties.
+    max_weight = max(a.weight for a in failing_fa)
+    top_failures = [a for a in failing_fa if a.weight == max_weight]
+    if len(top_failures) == 1:
+        a = top_failures[0]
+        return f"Resubmission: choose {a.name} (highest-weight failed FA)."
+
+    tied_names = ", ".join(a.name for a in top_failures)
+    return f"Resubmission: choose one of {tied_names} (tied highest-weight failed FAs)."
 
 
 def write_csv(assignments: list[Assignment], path: Path) -> None:
